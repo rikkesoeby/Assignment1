@@ -1,4 +1,4 @@
-"","SUBJ","VISIT","Ethnicity","Diagnosis","Gender","Age","ADOS","nonverbalIQ","verbalIQ.x","MOT_MLU","MOT_LUstd","CHI_MLU","CHI_LUstd","types_MOT","types_CHI","tokens_MOT","tokens_CHI","ADOS1","nonverbalIQ1","verbalIQ.y"
+"","SUBJ","VISIT","Ethnicity","Diagnosis","Gender","Age","ADOS","nonverbalIQ","verbalIQ","MOT_MLU","MOT_LUstd","CHI_MLU","CHI_LUstd","types_MOT","types_CHI","tokens_MOT","tokens_CHI","ADOS1","nonverbalIQ1","verbalIQ1"
 "1",1,1,"White","TD","M",19.8,0,28,14,3.621993127,2.164552956,1.252252252,0.473980052,378,14,1835,139,0,28,14
 "2",1,2,"White","TD","M",23.93,NA,NA,NA,3.857366771,2.417938569,1.013605442,0.115846166,403,18,2160,148,0,28,14
 "3",1,3,"White","TD","M",27.7,NA,NA,NA,4.321880651,2.517463506,1.556886228,0.747088484,455,97,2149,255,0,28,14
