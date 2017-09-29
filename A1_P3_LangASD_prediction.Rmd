@@ -15,6 +15,8 @@ library(lmerTest)
 library(modelr)
 library(plyr)
 library(stringr)
+library(Metrics)
+library(caret)
 ```
 
 ## Welcome to the third exciting part of the Language Development in ASD exercise
@@ -49,7 +51,7 @@ summary(model3)
         
 r.squaredGLMM(model3)
 
-rmse(model3, Data)
+modelr::rmse(model3, Data)
 
 
 
@@ -125,7 +127,7 @@ testdata = read_csv("all_data1.csv")
 
 model3 = lmer(CHI_MLU ~ 1 + VISIT + verbalIQ1  + MOT_MLU + types_CHI +(1+VISIT|SUBJ),REML = FALSE, Data)
 
-rmse(model3,testdata)
+modelr::rmse(model3,testdata)
 
 
 ```
@@ -156,16 +158,61 @@ summary(model1)
 
 r.squaredGLMM(model1)
 
-library(caret)
+
+
 flds <- createFolds(unique(Data$SUBJ), k = 4)
+
+test_rmse =NULL
+train_rmse = NULL
+n =1
 
 for(i in flds){
   
   #test
-  testdata =subset(Data,SUBJ %in% i)
+  testsub =subset(Data,SUBJ %in% i)
   #train
-  traindata = subset(Data,!(SUBJ %in% i))
+  trainsub = subset(Data,!(SUBJ %in% i))
+  #train the model (the function you should have made)
+  trainmodel = lmer(CHI_MLU ~ 1 + VISIT + Diagnosis + (1+VISIT|SUBJ),REML = FALSE, trainsub)
+  #save performance of the model (rmse() + predict() )
+  pred = predict(trainmodel, testsub, allow.new.levels = T)
+  test_rmse[n] =Metrics::rmse(testsub$CHI_MLU, pred) 
+  train_rmse[n]= Metrics::rmse(trainsub$CHI_MLU, fitted(trainmodel)) 
+  n= n+1
 }
+
+mean(test_rmse)
+mean(train_rmse)
+
+
+
+#for our own model
+flds <- createFolds(unique(Data$SUBJ), k = 4)
+
+test_rmse =NULL
+train_rmse = NULL
+n =1
+
+
+for(i in flds){
+  
+  #test
+  testsub =subset(Data,SUBJ %in% i)
+  #train
+  trainsub = subset(Data,!(SUBJ %in% i))
+  #train the model (the function you should have made)
+  trainmodel = lmer(CHI_MLU ~ 1 + VISIT + verbalIQ1  + MOT_MLU + types_CHI +(1+VISIT|SUBJ),REML = FALSE, trainsub)
+  #predicting the values of CHI_MLU
+  pred = predict(trainmodel, testsub, allow.new.levels = T)
+  #finding the error between the true value and the predicted MLU
+  test_rmse[n] =Metrics::rmse(testsub$CHI_MLU, pred) 
+  train_rmse[n]= Metrics::rmse(trainsub$CHI_MLU, fitted(trainmodel)) 
+  n= n+1
+}
+
+mean(test_rmse)
+mean(train_rmse)
+
 ```
 
 
@@ -181,6 +228,26 @@ You want to evaluate:
 (Tip: recreate the equation of the model: Y=Intercept+BetaX1+BetaX2, etc; input the average of the TD group  for each parameter in the model as X1, X2, etc.).
 
 - how does the child fare compared to the model predictions at Visit 6? Is the child below or above expectations? (tip: use the predict() function on Bernie's data only and compare the prediction with the actual performance of the child)
+
+```{r}
+
+
+bernie = subset(testdata, SUBJ == "2", select=c(SUBJ, VISIT, Diagnosis,  CHI_MLU, MOT_MLU,verbalIQ1, types_CHI))
+
+
+
+#average
+summary(model3)
+
+fakeChild= subset(Data,Diagnosis=='TD') %>% group_by(VISIT) %>% dplyr::summarise(verbalIQ1 = mean(verbalIQ1), MOT_MLU = mean(MOT_MLU), types_CHI =mean(types_CHI))
+fakeChild$SUBJ=200
+#the average prediction
+predict(model3,fakeChild,allow.new.levels=TRUE)
+#Bernies prediction
+predict(model3,bernie,allow.new.levels=TRUE)
+
+
+```
 
 [HERE GOES YOUR ANSWER]
 
