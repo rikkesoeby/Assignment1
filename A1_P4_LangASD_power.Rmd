@@ -73,11 +73,14 @@ fixef(CHImodel)["VISIT"] <- 0.1
 fixef(CHImodel)["verbalIQ1"] <- 0.1
 fixef(CHImodel)["MOT_MLU"] <- 0.1
 fixef(CHImodel)["types_CHI"] <- 0.1
-powerCurveV = powerCurve(CHIModel, fixed("VISIT"),along="SUBJ", nsim=10)
-powerCurveverbal = powerCurve(CHIModel, fixed("verbalIQ1"),along="SUBJ", nsim=10)
-powerCurveMOT = powerCurve(CHIModel, fixed("VISIT"),along="SUBJ", nsim=10)
-powerCurvetypes = powerCurve(CHIModel, fixed("VISIT"),along="SUBJ", nsim=10)
-
+powerCurveV = powerCurve(CHImodel, fixed("VISIT"),along="SUBJ", nsim=10)
+powerCurveverbal = powerCurve(CHImodel, fixed("verbalIQ1"),along="SUBJ", nsim=10)
+powerCurveMOT = powerCurve(CHImodel, fixed("MOT_MLU"),along="SUBJ", nsim=10)
+powerCurvetypes = powerCurve(CHImodel, fixed("types_CHI"),along="SUBJ", nsim=10)
+powerCurveV
+powerCurveverbal
+powerCurveMOT
+powerCurvetypes
 Problem?
 
 
@@ -89,7 +92,7 @@ createNewData <- function (participants,visits,model){
   # participants is the number of subjects
   # visits is the number of visits
   # TO DO: LOOP THROUGH ALL FE ROWS AND AUTOMATICALLY EXTRACT NAMES OF FIXED EFFECTS AND ESTIMATES
-  fe <- fixef(model)
+  fe <- fixef(bestmodel)
   Intercept <- fe[1] #intercept
   bVisit <- fe[2] #visit
   bDiagnosis <- fe[3] #diagnosis
@@ -97,17 +100,17 @@ createNewData <- function (participants,visits,model){
   # TO DO: INTEGRATE STANDARD ERROR?
   
   # TO DO: LOOP THROUGH ALL VC COMPONENTS AND AUTOMATICALLY EXTRACT NAMES OF EFFECTS AND ESTIMATES
-  vc<-VarCorr(model) # variance component
+  vc<-VarCorr(bestmodel) # variance component
   sigmaSubject <- as.numeric(attr(vc[[1]],"stddev")[1]) # random intercept by subject
   sigmaVisit <- as.numeric(attr(vc[[1]],"stddev")[2]) # random slope of visit over subject
   sigmaResiduals <- as.numeric(attr(vc,"sc"))
   sigmaCorrelation <- as.numeric(attr(vc[[1]],"correlation")[2])
   
   # Create an empty dataframe
-  d=expand.grid(Visit=1:visits,Child.ID=1:participants)
+  d=expand.grid(VISIT=1:visits,SUBJ=1:participants)
   # Randomly sample from a binomial (to generate the diagnosis)
   condition <- sample(rep(0:1, participants/2))
-  d$Diagnosis<-condition[d$Child.ID]
+  d$Diagnosis<-condition[d$SUBJ]
   d$Diagnosis[is.na(d$Diagnosis)]<-1
   
   ## Define variance covariance matrices:
@@ -118,7 +121,7 @@ createNewData <- function (participants,visits,model){
   
   ## generate new fake participants (column1=RandomIntercept, column2=RandomSlope)
   u<-mvrnorm(n=participants,
-             mu=c(0,0),Sigma=cov(ranef(model)$Child.ID))
+             mu=c(0,0),Sigma=cov(ranef(bestmodel)$Child.ID))
   
   ## now generate fake data:
   ### the outcome is extracted from a gaussian with
@@ -126,7 +129,7 @@ createNewData <- function (participants,visits,model){
   ### the residual standard deviation as standard deviation 
   d$CHI_MLU <- rnorm(participants*visits,
                      (Intercept+u[,1]) +
-                     (bVisit+u[,2])*d$Visit + 
+                     (bVisit+u[,2])*d$VISIT + 
                      bDiagnosis*d$Diagnosis ,sigmaResiduals)  
   
   return(d)
@@ -138,7 +141,31 @@ createNewData <- function (participants,visits,model){
 
 Assume you have only the resources to collect 30 kids (15 with ASD and 15 TDs). Identify the power for each relevant effect and discuss whether it's worth to run the study and why.
 
+```{r}
 
+TD15 = subset(Data, Diagnosis == "TD")
+TD15 = subset(try[1:88,])
 
+ASD15 = subset(Data, Diagnosis == "ASD")
+ASD15 = subset(ASD15[1:86,])
 
+data30= rbind(TD15, ASD15)
+
+CHImodel1 = lmer(CHI_MLU ~ 1 + VISIT + verbalIQ1  + MOT_MLU + types_CHI +(1+VISIT|SUBJ),REML = FALSE, data30)
+summary(CHImodel1)
+
+fixef(CHImodel1)["VISIT"] <- 0.1
+fixef(CHImodel1)["verbalIQ1"] <- 0.1
+fixef(CHImodel1)["MOT_MLU"] <- 0.1
+fixef(CHImodel1)["types_CHI"] <- 0.1
+powerCurveV = powerCurve(CHImodel1, fixed("VISIT"),along="SUBJ", nsim=10)
+powerCurveverbal = powerCurve(CHImodel1, fixed("verbalIQ1"),along="SUBJ", nsim=10)
+powerCurveMOT = powerCurve(CHImodel1, fixed("MOT_MLU"),along="SUBJ", nsim=10)
+powerCurvetypes = powerCurve(CHImodel1, fixed("types_CHI"),along="SUBJ", nsim=10)
+powerCurveV
+powerCurveverbal
+powerCurveMOT
+powerCurvetypes
+
+```
 
