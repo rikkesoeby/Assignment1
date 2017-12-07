@@ -44,7 +44,7 @@ How did your models from last time perform? In this exercise you have to compare
 ```{r}
 Data = read.csv("all_data.csv")
 
-
+#model from last time
 model3 = lmer(CHI_MLU ~ 1 + VISIT + verbalIQ1  + MOT_MLU + types_CHI +(1+VISIT|SUBJ),REML = FALSE, Data)
 summary(model3)
 
@@ -126,6 +126,7 @@ write.csv(file="all_data1.csv", x=all_data)
 testdata = read_csv("all_data1.csv")
 
 model3 = lmer(CHI_MLU ~ 1 + VISIT + verbalIQ1  + MOT_MLU + types_CHI +(1+VISIT|SUBJ),REML = FALSE, Data)
+summary(model3)
 
 modelr::rmse(model3,testdata)
 
@@ -234,17 +235,23 @@ You want to evaluate:
 
 bernie = subset(testdata, SUBJ == "2", select=c(SUBJ, VISIT, Diagnosis,  CHI_MLU, MOT_MLU,verbalIQ1, types_CHI))
 
-
-
 #average
 summary(model3)
-
+#making a fake child based on the TD children by averaging them
 fakeChild= subset(Data,Diagnosis=='TD') %>% group_by(VISIT) %>% dplyr::summarise(verbalIQ1 = mean(verbalIQ1), MOT_MLU = mean(MOT_MLU), types_CHI =mean(types_CHI))
+#give the fakechild
 fakeChild$SUBJ=200
 #the average prediction
-predict(model3,fakeChild,allow.new.levels=TRUE)
+pred1 =predict(model3,fakeChild,allow.new.levels=TRUE)
 #Bernies prediction
-predict(model3,bernie,allow.new.levels=TRUE)
+pred2 = predict(model3,bernie,allow.new.levels=TRUE)
+pred2 -pred1
+
+b6 =subset(bernie, VISIT ==6)
+pred1 = predict(model3,b6)
+pred1
+b6$CHI_MLU -pred1
+
 
 
 ```

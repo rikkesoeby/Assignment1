@@ -146,7 +146,7 @@ If you look at the data set now, you'll se a lot of NA's in the variables ADOS, 
 So let's make sure that we select only these variables as collected during the first visit for each child and repeat these values throughout all other visits.
 
 Tip: one solution requires you to select only the rows corresponding to visit 1 in a new dataset, to rename the columns of the relevant variables and to merge it back to the old dataset.
-Tip: subset() and select() might be useful.
+Tip:subset()and select() might be useful.
 Tip: the final dataset should have as many rows as the the old one.
 
 
@@ -171,13 +171,18 @@ Tip: as.numeric() might be a useful function, but not alone.
 Tip: Google "how to rename levels in R".
 
 ```{r}
+
 #making visit numeric
 all_data$VISIT = as.numeric(all_data$VISIT)
 
-#converting the ID into numbers
+#converting the ID into numbers 
 all_data$SUBJ<- as.factor(all_data$SUBJ)
   levels(all_data$SUBJ) <- 1:length(levels(all_data$SUBJ))
   all_data$SUBJ <- as.numeric(all_data$SUBJ)
+  
+  
+all_data$SUBJ = as.factor(all_data$SUBJ)
+all_data$SUBJ = as.numeric(all_data$SUBJ, levels =61)
 
 #rename levels of gender
 all_data$Gender <- as.character(all_data$Gender)
@@ -187,6 +192,9 @@ all_data$Gender[which(all_data$Gender=="2")] <- "F"
 all_data$Diagnosis <- as.character(all_data$Diagnosis)
 all_data$Diagnosis[which(all_data$Diagnosis=="A")] <- "ASD"
 all_data$Diagnosis[which(all_data$Diagnosis=="B")] <- "TD"
+
+
+
 ```
 
 
@@ -195,6 +203,8 @@ Save the data set using into a csv file. Hint: look into write.csv()
 ```{r}
 
 write.csv(file="all_data.csv", x=all_data)
+
+?write.csv
 
 ```
 

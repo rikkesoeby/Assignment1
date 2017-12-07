@@ -81,8 +81,8 @@ powerCurveV
 powerCurveverbal
 powerCurveMOT
 powerCurvetypes
-Problem?
 
+plot(powerCurveV)
 
 
 ### Riccardo's clumsy function to simulate new participants

@@ -236,6 +236,7 @@ Your task now is to figure out how to best describe the children linguistic traj
 model3 = lmer(CHI_MLU ~ 1 + VISIT + verbalIQ1  + MOT_MLU + types_CHI +(1+VISIT|SUBJ),REML = FALSE, data)
 summary(model3)
 
+        
 r.squaredGLMM(model3)
 
 ```
